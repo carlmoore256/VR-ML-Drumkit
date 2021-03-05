@@ -1,0 +1,4 @@
+- data collection & save : DONE
+- trajectory visualization
+- UI stop/start collection
+- Kit drawer (draw where pads are in space)
