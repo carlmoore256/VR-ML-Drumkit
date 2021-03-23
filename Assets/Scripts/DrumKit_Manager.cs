@@ -22,8 +22,17 @@ public class DrumInfo
     }
 }
 
+public class AllDrumInfo
+{
+    [XmlElement("DrumInfo")]
+    public List<DrumInfo> drumInfoList = new List<DrumInfo>();
+}
+
 public class DrumKit_Manager : MonoBehaviour
 {
+    // loads default drum configuration on start
+    public bool loadConfigOnStart = true;
+
     public bool saveSetup;
     public bool loadSetup;
 
@@ -31,7 +40,8 @@ public class DrumKit_Manager : MonoBehaviour
 
     void Start()
     {
-        LoadSetup();
+        if (loadConfigOnStart)
+            LoadSetup("Assets/Data/drum_config_default.xml");
     }
 
     private void Update()
@@ -51,42 +61,52 @@ public class DrumKit_Manager : MonoBehaviour
         }
     }
 
-    public void SaveSetup()
+    public void SaveSetup(string filename = "Assets/Data/drum_save.xml")
     {
-        //Transform[] drumComponents = GetComponentsInChildren<Transform>();
-
-        string filename = "Assets/Data/drum_save.xml";
-
         TextWriter writer = new StreamWriter(filename);
+        AllDrumInfo allDrumInfo = new AllDrumInfo();
 
-        foreach (GameObject drum in drumPrefabs)
+        foreach (GameObject drum in GetActiveDrums())
         {
             DrumInfo drumInfo = new DrumInfo(drum.transform);
-            XmlSerializer serializer = new XmlSerializer(typeof(DrumInfo));
-            serializer.Serialize(writer, drumInfo);
-            
+            allDrumInfo.drumInfoList.Add(drumInfo);
         }
+        XmlSerializer serializer = new XmlSerializer(typeof(AllDrumInfo));
+        serializer.Serialize(writer, allDrumInfo);
+
         writer.Close();
     }
 
-    public void LoadSetup()
+    public void LoadSetup(string filename = "Assets/Data/drum_save.xml")
     {
         print("LOADING DRUM INTO DRUM INFO");
+        RemoveExistingModels();
 
-        string filename = "Assets/Data/drum_save.xml";
-
-        XmlSerializer serializer = new XmlSerializer(typeof(DrumInfo));
+        XmlSerializer serializer = new XmlSerializer(typeof(AllDrumInfo));
         TextReader reader = new StreamReader(filename);
-        DrumInfo drumInfo = serializer.Deserialize(reader) as DrumInfo;
-        print(drumInfo);
-        GameObject newDrum = Instantiate(GetPrefabByName(drumInfo.prefabName), transform);
-        newDrum.transform.position = drumInfo.position;
+        AllDrumInfo allDrumInfo = serializer.Deserialize(reader) as AllDrumInfo;
 
+        foreach(DrumInfo di in allDrumInfo.drumInfoList)
+        {
+            print(di.position);
+            GameObject newDrum = Instantiate(GetPrefabByName(di.prefabName), transform);
+            newDrum.transform.position = di.position;
+            newDrum.transform.rotation = di.rotation;
+            newDrum.transform.localScale = di.scale;
+        }
     }
 
+    // removes drums for loading new config
     void RemoveExistingModels()
     {
+        print("removing existing models");
+        Transform[] allChildren = GetComponentsInChildren<Transform>();
 
+        foreach(Transform t in allChildren)
+        {
+            if (t != transform) // apparently [this] is in allChildren
+                Destroy(t.gameObject);
+        }
     }
 
     // get a name match for the prefab when instantiating
@@ -98,13 +118,12 @@ public class DrumKit_Manager : MonoBehaviour
         return null;
     }
 
-    // rootobject is the prefab
-    void Load(GameObject rootObject, string filename)
+    // return a list of active gameobjects that are drums
+    GameObject[] GetActiveDrums()
     {
-        //XmlSerializer serializer = new XmlSerializer(typeof(BuildingInfo));
-        //TextReader reader = new StreamReader(filename);
-        //DrumInfo drumInfo = serializer.Deserialize(reader) as BuildingInfo;
-        //drumInfo.Instantiate(rootObject);
+        List<GameObject> activeDrums = new List<GameObject>();
+        foreach (GameObject g in drumPrefabs)
+            activeDrums.Add(transform.Find(g.name).gameObject);
+        return activeDrums.ToArray();
     }
-
 }
