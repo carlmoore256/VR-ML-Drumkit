@@ -24,19 +24,42 @@ public class DrumInfo
 
 public class DrumKit_Manager : MonoBehaviour
 {
+    public bool saveSetup;
+    public bool loadSetup;
+
+    public GameObject[] drumPrefabs;
+
     void Start()
     {
-        
+        LoadSetup();
     }
 
-    void SaveSetup()
+    private void Update()
     {
-        GameObject[] drumComponents = GetComponentsInChildren<GameObject>();
-        string filename = "drum_save.xml";
+        if(saveSetup)
+        {
+            print("SAVING SETUP FROM INSPECTOR!");
+            SaveSetup();
+            saveSetup = false;
+        }
+
+        if (loadSetup)
+        {
+            print("LOADING SETUP FROM INSPECTOR!");
+            LoadSetup();
+            loadSetup = false;
+        }
+    }
+
+    public void SaveSetup()
+    {
+        //Transform[] drumComponents = GetComponentsInChildren<Transform>();
+
+        string filename = "Assets/Data/drum_save.xml";
 
         TextWriter writer = new StreamWriter(filename);
 
-        foreach (GameObject drum in drumComponents)
+        foreach (GameObject drum in drumPrefabs)
         {
             DrumInfo drumInfo = new DrumInfo(drum.transform);
             XmlSerializer serializer = new XmlSerializer(typeof(DrumInfo));
@@ -44,6 +67,35 @@ public class DrumKit_Manager : MonoBehaviour
             
         }
         writer.Close();
+    }
+
+    public void LoadSetup()
+    {
+        print("LOADING DRUM INTO DRUM INFO");
+
+        string filename = "Assets/Data/drum_save.xml";
+
+        XmlSerializer serializer = new XmlSerializer(typeof(DrumInfo));
+        TextReader reader = new StreamReader(filename);
+        DrumInfo drumInfo = serializer.Deserialize(reader) as DrumInfo;
+        print(drumInfo);
+        GameObject newDrum = Instantiate(GetPrefabByName(drumInfo.prefabName), transform);
+        newDrum.transform.position = drumInfo.position;
+
+    }
+
+    void RemoveExistingModels()
+    {
+
+    }
+
+    // get a name match for the prefab when instantiating
+    GameObject GetPrefabByName(string name)
+    {
+        foreach (GameObject g in drumPrefabs)
+            if (g.name == name)
+                return g;
+        return null;
     }
 
     // rootobject is the prefab

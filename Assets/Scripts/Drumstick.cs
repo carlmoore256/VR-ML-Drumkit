@@ -4,20 +4,20 @@ using UnityEngine;
 
 public class Drumstick : MonoBehaviour
 {
-    public Transform controller;
+    //public Transform controller;
 
-    OVRCameraRig cameraRig;
+    //OVRCameraRig cameraRig;
     void Start()
     {
-        transform.parent = controller;
-        cameraRig = GameObject.Find("OVRCameraRig").GetComponent<OVRCameraRig>();
+        //transform.parent = controller;
+        //cameraRig = GameObject.Find("OVRCameraRig").GetComponent<OVRCameraRig>();
     }
 
     // Make methods to re-position stick using joystick after toggle command
-    void Update()
-    {
+    //void Update()
+    //{
         
-    }
+    //}
 
     
 }

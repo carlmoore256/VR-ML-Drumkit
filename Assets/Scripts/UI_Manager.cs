@@ -21,12 +21,11 @@ public class UI_Manager : MonoBehaviour
     private LineRenderer lr_l;
     private LineRenderer lr_r;
 
-    //private Vector3[] linePoints_l;
-    //private Vector3[] linePoints_r;
-
     private Vector3 linePointerDist = new Vector3(0, 0, 20);
 
     CaptureMotion captureMotion;
+
+    public DrumKit_Manager dkMan;
     // Start is called before the first frame update
     void Start()
     {
@@ -39,18 +38,6 @@ public class UI_Manager : MonoBehaviour
         // initialize line pointers for when menu pops up
         lr_l = linePointer_L.GetComponent<LineRenderer>();
         lr_r = linePointer_R.GetComponent<LineRenderer>();
-
-        //linePoints_l = new Vector3[2];
-        //linePoints_r = new Vector3[2];
-
-        //linePoints_l[0] = linePointer_L.transform.position;
-        //linePoints_r[0] = linePointer_R.transform.position;
-
-        //linePoints_l[1] = linePointer_L.transform.position + linePointerDist;
-        //linePoints_r[1] = linePointer_R.transform.position + linePointerDist;
-
-        //lr_l.SetPositions(linePoints_l);
-        //lr_r.SetPositions(linePoints_r);
 
         SetLinePointersActive(false);
     }
@@ -78,21 +65,26 @@ public class UI_Manager : MonoBehaviour
         points[0] = linePointer.transform.position;
 
         Ray ray;
-        ray = new Ray(linePointer.transform.position, linePointer.transform.forward);
+
+        ray = new Ray(linePointer.transform.position, linePointer.transform.parent.forward);
+        //ray = new Ray(linePointer.transform.position, linePointer.transform.forward);
         RaycastHit hit;
 
-        if (Physics.Raycast(ray, out hit, layerMask))
+        //if (Physics.Raycast(ray, out hit, ~layerMask))
+        if (Physics.Raycast(linePointer.transform.position, linePointer.transform.parent.forward, out hit, Mathf.Infinity, layerMask))
         {
-            points[1] = linePointer.transform.forward + new Vector3(0, 0, hit.distance);
+                points[1] = hit.point;
             lr.startColor = Color.red;
             lr.endColor = Color.red;
             // store the button in the member var btn
             btn = hit.collider.gameObject.GetComponent<Button>();
             hitBtn = true;
+            HighlightButtton(btn);
         }
         else
         {
-            points[1] = linePointer.transform.forward + linePointerDist;
+            Physics.Raycast(linePointer.transform.position, linePointer.transform.parent.forward, out hit, Mathf.Infinity);
+            points[1] = hit.point;
             lr.startColor = Color.green;
             lr.endColor = Color.green;
         }
@@ -127,5 +119,20 @@ public class UI_Manager : MonoBehaviour
     public void OnSaveSetup()
     {
         print("SAVING SETUP");
+        dkMan.SaveSetup();
+    }
+
+    public void OnLoadSetup()
+    {
+        print("Loading Setup");
+        dkMan.LoadSetup();
+    }
+
+    IEnumerator HighlightButtton(Button button)
+    {
+        Color origColor = button.image.color;
+        button.image.color = Color.red;
+        yield return new WaitForSeconds(0.5f);
+        button.image.color = origColor;
     }
 }

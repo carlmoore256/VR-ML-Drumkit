@@ -1,7 +1,10 @@
 /Assets/Audio/
 /Assets/Data/
 /Assets/Oculus/
+CapturedMotion/
 
+.DS_Store
+._*
 
 # This .gitignore file should be placed at the root of your Unity project directory
 #
