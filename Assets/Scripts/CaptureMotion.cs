@@ -32,29 +32,44 @@ public class CaptureMotion : MonoBehaviour
     // sample rate for capture of motion data from controllers
     public int sampleRate = 500;
 
-    public string saveCaptureDir = "Assets/Data";
+    public string saveCaptureDir = "CapturedMotion/";
 
     private double sampleInterval;
     Thread captureThread = null;
-    List<CapturePoint[]> capturePoints;
+    List<CapturePoint[]> m_CapturePoints;
+    List<CapturePoint[]> m_PreviewCapPoints; // do this differently eventually
     OVRInput.Controller[] trackedControllers;
     // public float timeout = 5f;
     // bool tof = false;
-    public bool capRunning;
+    public bool m_CapRunning;
 
     void Start()
     {
+        m_CapturePoints = new List<CapturePoint[]>();
         sampleInterval = 1.0d / sampleRate;
         
         trackedControllers = new OVRInput.Controller[] { OVRInput.Controller.LTrackedRemote, OVRInput.Controller.RTrackedRemote };
+    }
+
+    public void ToggleCapture()
+    {
+        if (m_CapRunning)
+        {
+            EndCapture();
+        } else
+        {
+            StartCapture();
+        }
     }
     
     // can be called externally to begin the capture
     public void StartCapture()
     {
+        m_CapturePoints = new List<CapturePoint[]>();
+        print("STARTING CAPTURE!");
         captureThread = new Thread(RunCapture);
         captureThread.Start();
-        capRunning = true;
+        m_CapRunning = true;
     }
 
     public void EndCapture()
@@ -62,13 +77,13 @@ public class CaptureMotion : MonoBehaviour
         captureThread.Abort();
         print("capture thread ended successfully, saving data...");
         WriteMotionData();
-        capRunning = false;
+        m_CapRunning = false;
     }
 
     // main loop to sample controller data
     void RunCapture()
     {
-        capturePoints = new List<CapturePoint[]>();
+        //capturePoints = new List<CapturePoint[]>();
         double nextCap = AudioSettings.dspTime + sampleInterval;
 
         while(true)
@@ -78,28 +93,33 @@ public class CaptureMotion : MonoBehaviour
 
             if(now >= nextCap)
             {
-                CapturePoint[] ctrlPoints = new CapturePoint[trackedControllers.Length];
-                int index = 0;
-
-                // controllerPoints[0].position = new Vector3(10f, 25f, 0.5f);
-                // controllerPoints[1].position = new Vector3(50f, 55f, 5.5f);
-
-                foreach(OVRInput.Controller c in trackedControllers)
-                {
-                    ctrlPoints[index].controller = c;
-                    ctrlPoints[index].position = OVRInput.GetLocalControllerPosition(c);
-                    ctrlPoints[index].velocity = OVRInput.GetLocalControllerVelocity(c);
-                    ctrlPoints[index].acceleration = OVRInput.GetLocalControllerAcceleration(c);
-                    ctrlPoints[index].angularVel = OVRInput.GetLocalControllerAngularVelocity(c);
-                    ctrlPoints[index].angularAccel = OVRInput.GetLocalControllerAngularAcceleration(c);
-                    ctrlPoints[index].rotation = OVRInput.GetLocalControllerRotation(c);
-                    index++;
-                }
-                capturePoints.Add(ctrlPoints);
+                CapturePoint[] ctrlPoints = GetCapturePoints();
+                m_CapturePoints.Add(ctrlPoints);
                 nextCap = now + sampleInterval;
             }
         }
         // if(!tof && Time.time > timeout)
+    }
+
+    // gets a single capture point array of each controller points
+    CapturePoint[] GetCapturePoints()
+    {
+        CapturePoint[] capturePoints = new CapturePoint[trackedControllers.Length];
+        int index = 0;
+
+        foreach (OVRInput.Controller c in trackedControllers)
+        {
+            capturePoints[index].controller = c;
+            capturePoints[index].position = OVRInput.GetLocalControllerPosition(c);
+            capturePoints[index].velocity = OVRInput.GetLocalControllerVelocity(c);
+            capturePoints[index].acceleration = OVRInput.GetLocalControllerAcceleration(c);
+            capturePoints[index].angularVel = OVRInput.GetLocalControllerAngularVelocity(c);
+            capturePoints[index].angularAccel = OVRInput.GetLocalControllerAngularAcceleration(c);
+            capturePoints[index].rotation = OVRInput.GetLocalControllerRotation(c);
+            index++;
+        }
+
+        return capturePoints;
     }
 
     void Update()
@@ -139,7 +159,7 @@ public class CaptureMotion : MonoBehaviour
             var a_vel = new StringBuilder();
             var a_acc = new StringBuilder();
 
-            foreach(CapturePoint[] cp in capturePoints)
+            foreach(CapturePoint[] cp in m_CapturePoints)
             {
                 pos.AppendLine(ParseVector(cp[i].position));
                 vel.AppendLine(ParseVector(cp[i].velocity));
@@ -191,17 +211,45 @@ public class CaptureMotion : MonoBehaviour
     public Vector3[] GetPositions(int numPoints, int captureDevice)
     {
         Vector3[] positions = new Vector3[numPoints];
-        if(capturePoints.Count >= numPoints)
+
+        if (m_CapturePoints.Count >= numPoints)
         {
-            int cpCount = capturePoints.Count;
+            int cpCount = m_CapturePoints.Count;
+
             for(int i = 0; i < numPoints; i++)
-                positions[i] = capturePoints[cpCount - numPoints + i][captureDevice].position;
+                positions[i] = m_CapturePoints[cpCount - numPoints + i][captureDevice].position;
                 
             return positions;
         } else {
             return null;
         }
     }
+
+    // separate method from get positions that retrives capture points from previewCapPoints instead
+    //public Vector3[] GetPreviewPoints(int numPoints, int captureDevice)
+    //{
+    //    Vector3[] positions = new Vector3[numPoints];
+    //    m_PreviewCapPoints.Add(GetCapturePoints());
+
+    //    foreach(CapturePoint[] cp in m_PreviewCapPoints)
+    //    {
+
+    //    }
+
+    //    if (m_PreviewCapPoints.Count >= numPoints)
+    //    {
+    //        int cpCount = m_PreviewCapPoints.Count;
+
+    //        for (int i = 0; i < numPoints; i++)
+    //            positions[i] = m_PreviewCapPoints[cpCount - numPoints + i][captureDevice].position;
+
+    //        return positions;
+    //    }
+    //    else
+    //    {
+    //        return null;
+    //    }
+    //}
 }
 
 // LOOK INTO OVRBOUNDARY - BoundaryTestResult -> seems to report world position of hands

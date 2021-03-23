@@ -5,7 +5,13 @@ using UnityEngine.UI;
 
 public class UI_Manager : MonoBehaviour
 {
+
+    public MotionPreview mp_l;
+    public MotionPreview mp_r;
+
     public Material selectionMaterial;
+
+    public CaptureMotion captureMotion;
 
     public GameObject UI_panel;
 
@@ -23,14 +29,11 @@ public class UI_Manager : MonoBehaviour
 
     private Vector3 linePointerDist = new Vector3(0, 0, 20);
 
-    CaptureMotion captureMotion;
 
     public DrumKit_Manager dkMan;
     // Start is called before the first frame update
     void Start()
     {
-        //captureMotion = GetComponent<CaptureMotion>();
-
         img = GetComponent<Image>();
 
         UI_panel.SetActive(false);
@@ -48,10 +51,10 @@ public class UI_Manager : MonoBehaviour
 
         if (UI_panel.activeSelf)
         {
-            if(RayCastMenu(linePointer_L, lr_l) && OVRInput.Get(OVRInput.Button.Three))
+            if(RayCastMenu(linePointer_L, lr_l) && OVRInput.GetUp(OVRInput.Button.Three))
                 btn.onClick.Invoke();
 
-            if (RayCastMenu(linePointer_R, lr_r) && OVRInput.Get(OVRInput.Button.One))
+            if (RayCastMenu(linePointer_R, lr_r) && OVRInput.GetUp(OVRInput.Button.One))
                 btn.onClick.Invoke();
 
         }
@@ -126,6 +129,18 @@ public class UI_Manager : MonoBehaviour
     {
         print("Loading Setup");
         dkMan.LoadSetup();
+    }
+
+    public void OnTrailToggle()
+    {
+        mp_l.ToggleActive();
+        mp_r.ToggleActive();
+    }
+
+
+    public void OnCaptureMotion()
+    {
+        captureMotion.ToggleCapture();
     }
 
     IEnumerator HighlightButtton(Button button)

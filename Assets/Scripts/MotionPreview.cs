@@ -16,6 +16,8 @@ public class MotionPreview : MonoBehaviour
 
     Vector3[] linePoints;
 
+    bool m_Active = false;
+
 
     void Start()
     {
@@ -28,15 +30,32 @@ public class MotionPreview : MonoBehaviour
 
     void Update()
     {
-        if(cm.capRunning)
-        {
+        //if(cm.capRunning)
+        if(m_Active)
+            {
             Vector3[] positions = cm.GetPositions(trailLength, deviceIndex);
 
             if(positions != null)
             {
                 line.positionCount = trailLength;
                 line.SetPositions(positions);
+            } else
+            {
+                print("POSITIONS ARE NULL, START CAPTURE");
             }
         }
+    }
+
+    // call this to toggle motion preview
+    public void ToggleActive()
+    {
+        if (m_Active)
+        {
+            m_Active = false;
+        } else
+        {
+            m_Active = true;
+        }
+
     }
 }
