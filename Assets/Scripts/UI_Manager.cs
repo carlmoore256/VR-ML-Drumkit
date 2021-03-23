@@ -29,6 +29,7 @@ public class UI_Manager : MonoBehaviour
 
     private Vector3 linePointerDist = new Vector3(0, 0, 20);
 
+    bool capToggle;
 
     public DrumKit_Manager dkMan;
     // Start is called before the first frame update
@@ -141,6 +142,18 @@ public class UI_Manager : MonoBehaviour
     public void OnCaptureMotion()
     {
         captureMotion.ToggleCapture();
+
+        if (capToggle)
+        {
+            capToggle = false;
+            btn.image.color = Color.white;
+        }
+        else
+        {
+            capToggle = true;
+            btn.image.color = Color.red;
+        }
+
     }
 
     IEnumerator HighlightButtton(Button button)

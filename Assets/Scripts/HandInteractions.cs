@@ -36,7 +36,6 @@ public class HandInteractions : MonoBehaviour
 
             if(mSelectedProp != null)
             {
-                print("M GRAB FLAG " + mGrabFlag);
                 mSelectedProp.MoveProp(transform.position, mGrabFlag);
                 Vector2 scale = OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick);
                 mSelectedProp.ScaleProp(scale.y * 0.5f);

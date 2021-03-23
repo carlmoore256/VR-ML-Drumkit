@@ -210,19 +210,39 @@ public class CaptureMotion : MonoBehaviour
     // returns a vector3[] of positions from the last numPoints samples, from the captureDevice (index)
     public Vector3[] GetPositions(int numPoints, int captureDevice)
     {
+        if (m_CapturePoints.Count < numPoints)
+            numPoints = m_CapturePoints.Count;
+
+        if (numPoints == 0)
+            return null;
+
         Vector3[] positions = new Vector3[numPoints];
 
-        if (m_CapturePoints.Count >= numPoints)
-        {
-            int cpCount = m_CapturePoints.Count;
+        CapturePoint[][] capSubset = new CapturePoint[numPoints][];
 
-            for(int i = 0; i < numPoints; i++)
-                positions[i] = m_CapturePoints[cpCount - numPoints + i][captureDevice].position;
-                
-            return positions;
-        } else {
-            return null;
+        m_CapturePoints.CopyTo(m_CapturePoints.Count - numPoints, capSubset, 0, numPoints);
+
+        int index = 0;
+
+        foreach(CapturePoint[] cp in capSubset)
+        {
+            positions[index] = cp[captureDevice].position;
+            index++;
         }
+
+        return positions;
+
+        //if (m_CapturePoints.Count >= numPoints)
+        //{
+        //    int cpCount = m_CapturePoints.Count;
+
+        //    for(int i = 0; i < numPoints; i++)
+        //        positions[i] = m_CapturePoints[cpCount - numPoints + i][captureDevice].position;
+                
+        //    return positions;
+        //} else {
+        //    return null;
+        //}
     }
 
     // separate method from get positions that retrives capture points from previewCapPoints instead
