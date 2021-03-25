@@ -226,6 +226,7 @@ public class CaptureMotion : MonoBehaviour
 
         foreach(CapturePoint[] cp in capSubset)
         {
+            //print(
             positions[index] = cp[captureDevice].position;
             index++;
         }

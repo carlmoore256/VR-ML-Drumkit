@@ -17,8 +17,12 @@ public class UI_Manager : MonoBehaviour
 
     public GameObject linePointer_L;
     public GameObject linePointer_R;
+    public Transform stick_L;
+    public Transform stick_R;
 
     public LayerMask layerMask;
+
+    public OVRPlayerController playerController;
 
     public Button btn;
 
@@ -29,7 +33,9 @@ public class UI_Manager : MonoBehaviour
 
     private Vector3 linePointerDist = new Vector3(0, 0, 20);
 
+    bool playerMovement = true; // begin with movement enabled
     bool capToggle;
+    bool stickAdjust;
 
     public DrumKit_Manager dkMan;
     // Start is called before the first frame update
@@ -52,13 +58,24 @@ public class UI_Manager : MonoBehaviour
 
         if (UI_panel.activeSelf)
         {
-            if(RayCastMenu(linePointer_L, lr_l) && OVRInput.GetUp(OVRInput.Button.Three))
+            if (RayCastMenu(linePointer_L, lr_l) && OVRInput.GetUp(OVRInput.Button.Three))
                 btn.onClick.Invoke();
 
             if (RayCastMenu(linePointer_R, lr_r) && OVRInput.GetUp(OVRInput.Button.One))
                 btn.onClick.Invoke();
 
+            if (stickAdjust)
+            {
+                AdjustStickPosition(OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick), stick_L);
+                AdjustStickPosition(OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick), stick_R);
+            }
         }
+    }
+
+    void AdjustStickPosition(Vector2 thumbStick, Transform drumStick)
+    {
+        drumStick.Translate(Vector3.forward * thumbStick.y * 0.01f);
+        drumStick.Rotate(new Vector3(thumbStick.x * 0.01f, 0, 0));
     }
 
     bool RayCastMenu(GameObject linePointer, LineRenderer lr)
@@ -98,6 +115,7 @@ public class UI_Manager : MonoBehaviour
         return hitBtn;
     }
 
+    // enable/disable left and right line pointers for menu selection
     void SetLinePointersActive(bool state)
     {
         lr_l.enabled = state;
@@ -138,22 +156,32 @@ public class UI_Manager : MonoBehaviour
         mp_r.ToggleActive();
     }
 
+    // swap button color when toggled
+    void ToggleButtonColor(bool state)
+    {
+        btn.image.color = state ? Color.red : Color.white;
+    }
+
 
     public void OnCaptureMotion()
     {
+        capToggle = !capToggle; // negate bool
+        ToggleButtonColor(capToggle);
         captureMotion.ToggleCapture();
+    }
 
-        if (capToggle)
-        {
-            capToggle = false;
-            btn.image.color = Color.white;
-        }
-        else
-        {
-            capToggle = true;
-            btn.image.color = Color.red;
-        }
+    public void OnPlayerMovement()
+    {
+        playerMovement = !playerMovement;
+        ToggleButtonColor(playerMovement);
+        playerController.EnableLinearMovement = playerMovement;
+    }
 
+    public void OnStickAdjust()
+    {
+        stickAdjust = !stickAdjust;
+        ToggleButtonColor(stickAdjust);
+        playerController.EnableLinearMovement = stickAdjust;
     }
 
     IEnumerator HighlightButtton(Button button)

@@ -93,6 +93,7 @@ public class DrumKit_Manager : MonoBehaviour
             newDrum.transform.position = di.position;
             newDrum.transform.rotation = di.rotation;
             newDrum.transform.localScale = di.scale;
+            newDrum.name = newDrum.name.Replace("(Clone)", "");
         }
     }
 
@@ -123,7 +124,12 @@ public class DrumKit_Manager : MonoBehaviour
     {
         List<GameObject> activeDrums = new List<GameObject>();
         foreach (GameObject g in drumPrefabs)
+        {
+            //print(g.name);
+            //print(transform.Find(g.name))
             activeDrums.Add(transform.Find(g.name).gameObject);
+
+        }
         return activeDrums.ToArray();
     }
 }
