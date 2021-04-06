@@ -100,7 +100,6 @@ public class UI_Manager : MonoBehaviour
             // store the button in the member var btn
             btn = hit.collider.gameObject.GetComponent<Button>();
             hitBtn = true;
-            HighlightButtton(btn);
         }
         else
         {
@@ -182,13 +181,5 @@ public class UI_Manager : MonoBehaviour
         stickAdjust = !stickAdjust;
         ToggleButtonColor(stickAdjust);
         playerController.EnableLinearMovement = stickAdjust;
-    }
-
-    IEnumerator HighlightButtton(Button button)
-    {
-        Color origColor = button.image.color;
-        button.image.color = Color.red;
-        yield return new WaitForSeconds(0.5f);
-        button.image.color = origColor;
     }
 }

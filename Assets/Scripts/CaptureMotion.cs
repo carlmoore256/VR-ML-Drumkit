@@ -34,6 +34,8 @@ public class CaptureMotion : MonoBehaviour
 
     public string saveCaptureDir = "CapturedMotion/";
 
+    public Transform playerPosition;
+
     private double sampleInterval;
     Thread captureThread = null;
     List<CapturePoint[]> m_CapturePoints;
@@ -218,17 +220,15 @@ public class CaptureMotion : MonoBehaviour
 
         Vector3[] positions = new Vector3[numPoints];
 
-        CapturePoint[][] capSubset = new CapturePoint[numPoints][];
+        CapturePoint[] caps;
 
-        m_CapturePoints.CopyTo(m_CapturePoints.Count - numPoints, capSubset, 0, numPoints);
+        if (m_CapturePoints.Count < numPoints)
+            numPoints = m_CapturePoints.Count;
 
-        int index = 0;
-
-        foreach(CapturePoint[] cp in capSubset)
+        for (int i = 0; i<numPoints; i++)
         {
-            //print(
-            positions[index] = cp[captureDevice].position;
-            index++;
+            caps = m_CapturePoints[m_CapturePoints.Count - numPoints + i];
+            positions[i] = caps[captureDevice].position;
         }
 
         return positions;

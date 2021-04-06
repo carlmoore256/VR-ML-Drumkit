@@ -26,6 +26,7 @@ public class MotionPreview : MonoBehaviour
         trailLength = (int)(cm.sampleRate * trailSecs);
         print("trail length : " + trailLength);
         linePoints = new Vector3[trailLength];
+        line.enabled = false;
     }
 
     void Update()
@@ -52,9 +53,11 @@ public class MotionPreview : MonoBehaviour
         if (m_Active)
         {
             m_Active = false;
+            line.enabled = false;
         } else
         {
             m_Active = true;
+            line.enabled = true;
         }
 
     }
