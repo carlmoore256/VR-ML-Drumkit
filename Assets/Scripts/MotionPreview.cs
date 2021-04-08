@@ -10,7 +10,9 @@ public class MotionPreview : MonoBehaviour
 
     public int deviceIndex;
 
-    int trailLength;
+    public Vector3 trailOffset;
+
+    int m_TrailLength;
 
     CaptureMotion cm;
 
@@ -23,9 +25,9 @@ public class MotionPreview : MonoBehaviour
     {
         line = GetComponent<LineRenderer>();
         cm = GameObject.Find("Manager").GetComponent<CaptureMotion>();
-        trailLength = (int)(cm.sampleRate * trailSecs);
-        print("trail length : " + trailLength);
-        linePoints = new Vector3[trailLength];
+        m_TrailLength = CalculateTrailLength(trailSecs);
+        print("trail length : " + m_TrailLength);
+        linePoints = new Vector3[m_TrailLength];
         line.enabled = false;
     }
 
@@ -33,12 +35,12 @@ public class MotionPreview : MonoBehaviour
     {
         //if(cm.capRunning)
         if(m_Active)
-            {
-            Vector3[] positions = cm.GetPositions(trailLength, deviceIndex);
+        {
+            Vector3[] positions = cm.GetPositions(m_TrailLength, deviceIndex, trailOffset);
 
             if(positions != null)
-            {
-                line.positionCount = trailLength;
+            { 
+                line.positionCount = m_TrailLength;
                 line.SetPositions(positions);
             } else
             {
@@ -47,8 +49,14 @@ public class MotionPreview : MonoBehaviour
         }
     }
 
+    int CalculateTrailLength(float seconds)
+    {
+        return (int)(cm.sampleRate * seconds);
+    }
+
+
     // call this to toggle motion preview
-    public void ToggleActive()
+    public void ToggleActive(float trailLenSecs)
     {
         if (m_Active)
         {
@@ -58,6 +66,7 @@ public class MotionPreview : MonoBehaviour
         {
             m_Active = true;
             line.enabled = true;
+            m_TrailLength = CalculateTrailLength(trailLenSecs);
         }
 
     }

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class UI_Manager : MonoBehaviour
 {
-
+    public float motionTrailSecs = 1.0f;
     public MotionPreview mp_l;
     public MotionPreview mp_r;
 
@@ -151,8 +151,8 @@ public class UI_Manager : MonoBehaviour
 
     public void OnTrailToggle()
     {
-        mp_l.ToggleActive();
-        mp_r.ToggleActive();
+        mp_l.ToggleActive(motionTrailSecs);
+        mp_r.ToggleActive(motionTrailSecs);
     }
 
     // swap button color when toggled

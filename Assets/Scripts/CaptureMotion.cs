@@ -11,6 +11,7 @@ public class CaptureMotion : MonoBehaviour
     {
         public OVRInput.Controller controller;
         public Vector3 position;
+        public Vector3 worldSpacePosition; // has offset of the player in world space
         public Vector3 velocity;
         public Vector3 acceleration;
         public Vector3 angularVel;
@@ -21,6 +22,7 @@ public class CaptureMotion : MonoBehaviour
         {
             this.controller = controller;
             this.position = position;
+            this.worldSpacePosition = position;
             this.velocity = velocity;
             this.acceleration = acceleration;
             this.angularVel = angularVel;
@@ -34,7 +36,12 @@ public class CaptureMotion : MonoBehaviour
 
     public string saveCaptureDir = "CapturedMotion/";
 
+    public float forwardOffset = 0.1f;
+
     public Transform playerPosition;
+
+    private Vector3 currentPlayerPosition;
+    private Vector3 playerForward;
 
     private double sampleInterval;
     Thread captureThread = null;
@@ -113,6 +120,7 @@ public class CaptureMotion : MonoBehaviour
         {
             capturePoints[index].controller = c;
             capturePoints[index].position = OVRInput.GetLocalControllerPosition(c);
+            capturePoints[index].worldSpacePosition = OVRInput.GetLocalControllerPosition(c) + currentPlayerPosition + currentPlayerPosition;
             capturePoints[index].velocity = OVRInput.GetLocalControllerVelocity(c);
             capturePoints[index].acceleration = OVRInput.GetLocalControllerAcceleration(c);
             capturePoints[index].angularVel = OVRInput.GetLocalControllerAngularVelocity(c);
@@ -126,6 +134,10 @@ public class CaptureMotion : MonoBehaviour
 
     void Update()
     {
+        // we can't access this from a separate thread in the capture, 
+        // so we assign it during update
+        currentPlayerPosition = playerPosition.position;
+        playerForward = playerPosition.forward;
         //Vector3 pos = OVRInput.GetLocalControllerPosition(c);
         // {
         //     print("TIME RAN OUT!!!");
@@ -210,7 +222,7 @@ public class CaptureMotion : MonoBehaviour
     }
 
     // returns a vector3[] of positions from the last numPoints samples, from the captureDevice (index)
-    public Vector3[] GetPositions(int numPoints, int captureDevice)
+    public Vector3[] GetPositions(int numPoints, int captureDevice, Vector3 offset)
     {
         if (m_CapturePoints.Count < numPoints)
             numPoints = m_CapturePoints.Count;
@@ -225,52 +237,14 @@ public class CaptureMotion : MonoBehaviour
         if (m_CapturePoints.Count < numPoints)
             numPoints = m_CapturePoints.Count;
 
-        for (int i = 0; i<numPoints; i++)
+        for (int i = 0; i < numPoints; i++)
         {
             caps = m_CapturePoints[m_CapturePoints.Count - numPoints + i];
-            positions[i] = caps[captureDevice].position;
+            positions[i] = caps[captureDevice].worldSpacePosition + offset;
         }
 
         return positions;
-
-        //if (m_CapturePoints.Count >= numPoints)
-        //{
-        //    int cpCount = m_CapturePoints.Count;
-
-        //    for(int i = 0; i < numPoints; i++)
-        //        positions[i] = m_CapturePoints[cpCount - numPoints + i][captureDevice].position;
-                
-        //    return positions;
-        //} else {
-        //    return null;
-        //}
     }
-
-    // separate method from get positions that retrives capture points from previewCapPoints instead
-    //public Vector3[] GetPreviewPoints(int numPoints, int captureDevice)
-    //{
-    //    Vector3[] positions = new Vector3[numPoints];
-    //    m_PreviewCapPoints.Add(GetCapturePoints());
-
-    //    foreach(CapturePoint[] cp in m_PreviewCapPoints)
-    //    {
-
-    //    }
-
-    //    if (m_PreviewCapPoints.Count >= numPoints)
-    //    {
-    //        int cpCount = m_PreviewCapPoints.Count;
-
-    //        for (int i = 0; i < numPoints; i++)
-    //            positions[i] = m_PreviewCapPoints[cpCount - numPoints + i][captureDevice].position;
-
-    //        return positions;
-    //    }
-    //    else
-    //    {
-    //        return null;
-    //    }
-    //}
 }
 
 // LOOK INTO OVRBOUNDARY - BoundaryTestResult -> seems to report world position of hands
