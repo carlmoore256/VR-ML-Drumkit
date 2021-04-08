@@ -2,7 +2,7 @@
 /Assets/Data/
 /Assets/Oculus/
 CapturedMotion/
-"/Assets/TextMesh Pro/"
+/Assets/TextMesh*Pro/
 
 .DS_Store
 ._*

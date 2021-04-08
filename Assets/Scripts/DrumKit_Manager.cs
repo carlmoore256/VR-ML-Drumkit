@@ -32,6 +32,7 @@ public class DrumKit_Manager : MonoBehaviour
 {
     // loads default drum configuration on start
     public bool loadConfigOnStart = true;
+    public string configFile = "roland_setup_main.xml";
 
     public bool saveSetup;
     public bool loadSetup;
@@ -41,7 +42,7 @@ public class DrumKit_Manager : MonoBehaviour
     void Start()
     {
         if (loadConfigOnStart)
-            LoadSetup("Assets/Data/drum_config_default.xml");
+            LoadSetup("Assets/Data/" + configFile);
     }
 
     private void Update()
