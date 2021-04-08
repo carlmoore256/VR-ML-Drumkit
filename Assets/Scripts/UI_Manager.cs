@@ -35,7 +35,8 @@ public class UI_Manager : MonoBehaviour
 
     bool playerMovement = true; // begin with movement enabled
     bool capToggle;
-    bool stickAdjust;
+    bool stickAdjustTranslate;
+    bool stickAdjustRotate;
 
     public DrumKit_Manager dkMan;
     // Start is called before the first frame update
@@ -64,18 +65,28 @@ public class UI_Manager : MonoBehaviour
             if (RayCastMenu(linePointer_R, lr_r) && OVRInput.GetUp(OVRInput.Button.One))
                 btn.onClick.Invoke();
 
-            if (stickAdjust)
+            if (stickAdjustTranslate)
             {
-                AdjustStickPosition(OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick), stick_L);
-                AdjustStickPosition(OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick), stick_R);
+                AdjustStickTranslation(OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick), stick_L);
+                AdjustStickTranslation(OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick), stick_R);
+            }
+            if (stickAdjustRotate)
+            {
+                AdjustStickRotation(OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick), stick_L);
+                AdjustStickRotation(OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick), stick_R);
             }
         }
     }
 
-    void AdjustStickPosition(Vector2 thumbStick, Transform drumStick)
+    void AdjustStickTranslation(Vector2 thumbStick, Transform drumStick)
     {
-        drumStick.Translate(Vector3.forward * thumbStick.y * 0.01f);
-        drumStick.Rotate(new Vector3(thumbStick.x * 0.01f, 0, 0));
+        drumStick.Translate(Vector3.forward * thumbStick.y * 0.001f);
+        drumStick.Translate(new Vector3(thumbStick.x * 0.001f, 0, 0));
+    }
+
+    void AdjustStickRotation(Vector2 thumbStick, Transform drumStick)
+    {
+        drumStick.Rotate(new Vector3(thumbStick.y * 0.1f, thumbStick.x * 0.1f, 0));
     }
 
     bool RayCastMenu(GameObject linePointer, LineRenderer lr)
@@ -176,10 +187,16 @@ public class UI_Manager : MonoBehaviour
         playerController.EnableLinearMovement = playerMovement;
     }
 
-    public void OnStickAdjust()
+    public void OnStickAdjustTranslate()
     {
-        stickAdjust = !stickAdjust;
-        ToggleButtonColor(stickAdjust);
-        playerController.EnableLinearMovement = stickAdjust;
+        stickAdjustTranslate = !stickAdjustTranslate;
+        ToggleButtonColor(stickAdjustTranslate);
+        //playerController.EnableLinearMovement = stickAdjustTranslate;
+    }
+    public void OnStickAdjustRotate()
+    {
+        stickAdjustRotate = !stickAdjustRotate;
+        ToggleButtonColor(stickAdjustRotate);
+        //playerController.EnableLinearMovement = stickAdjustTranslate;
     }
 }
