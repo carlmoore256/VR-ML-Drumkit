@@ -17,6 +17,7 @@ public class CaptureMotion : MonoBehaviour
         public Vector3 angularVel;
         public Vector3 angularAccel;
         public Quaternion rotation;
+        public Vector2Int midiNote;
 
         public CapturePoint(OVRInput.Controller controller, Vector3 position, Vector3 velocity, Vector3 acceleration, Vector3 angularVel, Vector3 angularAccel, Quaternion rotation)
         {
@@ -28,6 +29,7 @@ public class CaptureMotion : MonoBehaviour
             this.angularVel = angularVel;
             this.angularAccel = angularAccel;
             this.rotation = rotation;
+            this.midiNote = new Vector2Int(0, 0);
         }
     }
 
@@ -40,24 +42,26 @@ public class CaptureMotion : MonoBehaviour
 
     public Transform playerPosition;
 
+    public bool m_CapRunning;
+
     private Vector3 currentPlayerPosition;
     private Vector3 playerForward;
-
     private double sampleInterval;
+
     Thread captureThread = null;
     List<CapturePoint[]> m_CapturePoints;
     List<CapturePoint[]> m_PreviewCapPoints; // do this differently eventually
     OVRInput.Controller[] trackedControllers;
-    // public float timeout = 5f;
-    // bool tof = false;
-    public bool m_CapRunning;
+    NoteCallback m_NoteCallback;
 
     void Start()
     {
         m_CapturePoints = new List<CapturePoint[]>();
         sampleInterval = 1.0d / sampleRate;
-        
+
         trackedControllers = new OVRInput.Controller[] { OVRInput.Controller.LTrackedRemote, OVRInput.Controller.RTrackedRemote };
+
+        m_NoteCallback = GetComponent<NoteCallback>();
     }
 
     public void ToggleCapture()
@@ -70,7 +74,7 @@ public class CaptureMotion : MonoBehaviour
             StartCapture();
         }
     }
-    
+
     // can be called externally to begin the capture
     public void StartCapture()
     {
@@ -95,12 +99,12 @@ public class CaptureMotion : MonoBehaviour
         //capturePoints = new List<CapturePoint[]>();
         double nextCap = AudioSettings.dspTime + sampleInterval;
 
-        while(true)
+        while (true)
         {
             // maybe not the best way to sample but here for now
             double now = AudioSettings.dspTime;
 
-            if(now >= nextCap)
+            if (now >= nextCap)
             {
                 CapturePoint[] ctrlPoints = GetCapturePoints();
                 m_CapturePoints.Add(ctrlPoints);
@@ -126,6 +130,7 @@ public class CaptureMotion : MonoBehaviour
             capturePoints[index].angularVel = OVRInput.GetLocalControllerAngularVelocity(c);
             capturePoints[index].angularAccel = OVRInput.GetLocalControllerAngularAcceleration(c);
             capturePoints[index].rotation = OVRInput.GetLocalControllerRotation(c);
+            capturePoints[index].midiNote = m_NoteCallback.GetLastNoteRecieved();
             index++;
         }
 
@@ -148,7 +153,7 @@ public class CaptureMotion : MonoBehaviour
 
     void OnDestroy()
     {
-        if(captureThread != null)
+        if (captureThread != null)
             EndCapture();
     }
 
@@ -165,36 +170,47 @@ public class CaptureMotion : MonoBehaviour
         string saveDir = System.IO.Path.Combine(saveCaptureDir, timestamp);
         System.IO.Directory.CreateDirectory(saveDir);
 
-        for(int i = 0; i < trackedControllers.Length; i++)
+        for (int i = 0; i < trackedControllers.Length; i++)
         {
             var pos = new StringBuilder();
+            var world_pos = new StringBuilder();
             var vel = new StringBuilder();
             var acc = new StringBuilder();
             var a_vel = new StringBuilder();
             var a_acc = new StringBuilder();
+            var midi = new StringBuilder();
 
-            foreach(CapturePoint[] cp in m_CapturePoints)
+            foreach (CapturePoint[] cp in m_CapturePoints)
             {
                 pos.AppendLine(ParseVector(cp[i].position));
+                world_pos.AppendLine(ParseVector(cp[i].worldSpacePosition));
                 vel.AppendLine(ParseVector(cp[i].velocity));
                 acc.AppendLine(ParseVector(cp[i].acceleration));
                 a_vel.AppendLine(ParseVector(cp[i].angularVel));
                 a_acc.AppendLine(ParseVector(cp[i].angularAccel));
+                midi.AppendLine(ParseVector2Int(cp[i].midiNote));
             }
-            
+
             File.WriteAllText(System.IO.Path.Combine(saveDir, $"pos_c{i}.csv"), pos.ToString());
+            File.WriteAllText(System.IO.Path.Combine(saveDir, $"pos_world_c{i}.csv"), world_pos.ToString());
             File.WriteAllText(System.IO.Path.Combine(saveDir, $"vel_c{i}.csv"), vel.ToString());
             File.WriteAllText(System.IO.Path.Combine(saveDir, $"acc_c{i}.csv"), acc.ToString());
-            File.WriteAllText(System.IO.Path.Combine(saveDir, $"a_vel_c{i}.csv"), a_vel.ToString());
-            File.WriteAllText(System.IO.Path.Combine(saveDir, $"a_acc_c{i}.csv"), a_acc.ToString());
+            File.WriteAllText(System.IO.Path.Combine(saveDir, $"ang_vel_c{i}.csv"), a_vel.ToString());
+            File.WriteAllText(System.IO.Path.Combine(saveDir, $"ang_acc_c{i}.csv"), a_acc.ToString());
+            File.WriteAllText(System.IO.Path.Combine(saveDir, $"midi_note_c{i}.csv"), midi.ToString());
 
             print("data written to " + saveDir);
         }
     }
 
     public string[] Vector3toString(Vector3 v)
-    { 
-        return new string[3] { v.x.ToString(), v.y.ToString(), v.z.ToString() }; 
+    {
+        return new string[3] { v.x.ToString(), v.y.ToString(), v.z.ToString() };
+    }
+
+    public string[] Vector2InttoString(Vector2Int v)
+    {
+        return new string[2] { v.x.ToString(), v.y.ToString() };
     }
 
     public string[] QuaternionToString(Quaternion q)
@@ -206,6 +222,12 @@ public class CaptureMotion : MonoBehaviour
     public string ParseVector(Vector3 v)
     {
         string[] vecStr = Vector3toString(v);
+        return ParseLine(vecStr);
+    }
+
+    public string ParseVector2Int(Vector2Int v)
+    {
+        string[] vecStr = Vector2InttoString(v);
         return ParseLine(vecStr);
     }
 
