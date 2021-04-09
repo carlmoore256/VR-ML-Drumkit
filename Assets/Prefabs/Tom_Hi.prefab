@@ -95,7 +95,7 @@ GameObject:
   - component: {fileID: 3227864967238599809}
   m_Layer: 8
   m_Name: Drumhead
-  m_TagString: Untagged
+  m_TagString: tomhi
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -536,7 +536,7 @@ GameObject:
   - component: {fileID: 867394889847363582}
   m_Layer: 8
   m_Name: Tom_Hi
-  m_TagString: Untagged
+  m_TagString: tomhi
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

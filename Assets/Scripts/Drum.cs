@@ -10,12 +10,14 @@ public class Drum : MonoBehaviour
     public float swellAmount = 0.01f;
     Coroutine swellEffect;
     AudioSource audioSource;
+    DrumCollisionManager dcm;
 
 
     void Start()
     {
         // audioSource = GetComponent<AudioSource>();
         audioSource = gameObject.AddComponent<AudioSource>();
+        dcm = GameObject.Find("Manager").GetComponent<DrumCollisionManager>();
     }
 
     void Update()
@@ -31,6 +33,9 @@ public class Drum : MonoBehaviour
     {
         if(collision.gameObject.CompareTag("stick"))
         {
+            // report collision with name of controller and this drum's tag
+            GameObject colliderParent = collision.transform.parent.gameObject;
+            dcm.ReportCollision(colliderParent.name, gameObject.tag);
             // float velocity = collision.relativeVelocity.magnitude;
             float velocity = 1f;
             DrumHit(velocity);

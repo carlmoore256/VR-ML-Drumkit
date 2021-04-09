@@ -19,7 +19,7 @@ public class CaptureMotion : MonoBehaviour
         public Quaternion rotation;
         public Vector2Int midiNote;
 
-        public CapturePoint(OVRInput.Controller controller, Vector3 position, Vector3 velocity, Vector3 acceleration, Vector3 angularVel, Vector3 angularAccel, Quaternion rotation)
+        public CapturePoint(OVRInput.Controller controller, Vector3 position, Vector3 velocity, Vector3 acceleration, Vector3 angularVel, Vector3 angularAccel, Quaternion rotation, Vector2Int midi)
         {
             this.controller = controller;
             this.position = position;
@@ -29,7 +29,7 @@ public class CaptureMotion : MonoBehaviour
             this.angularVel = angularVel;
             this.angularAccel = angularAccel;
             this.rotation = rotation;
-            this.midiNote = new Vector2Int(0, 0);
+            this.midiNote = midi;
         }
     }
 
@@ -52,7 +52,8 @@ public class CaptureMotion : MonoBehaviour
     List<CapturePoint[]> m_CapturePoints;
     List<CapturePoint[]> m_PreviewCapPoints; // do this differently eventually
     OVRInput.Controller[] trackedControllers;
-    NoteCallback m_NoteCallback;
+
+    DrumCollisionManager dcm; 
 
     void Start()
     {
@@ -60,8 +61,7 @@ public class CaptureMotion : MonoBehaviour
         sampleInterval = 1.0d / sampleRate;
 
         trackedControllers = new OVRInput.Controller[] { OVRInput.Controller.LTrackedRemote, OVRInput.Controller.RTrackedRemote };
-
-        m_NoteCallback = GetComponent<NoteCallback>();
+        dcm = GetComponent<DrumCollisionManager>();
     }
 
     public void ToggleCapture()
@@ -130,7 +130,7 @@ public class CaptureMotion : MonoBehaviour
             capturePoints[index].angularVel = OVRInput.GetLocalControllerAngularVelocity(c);
             capturePoints[index].angularAccel = OVRInput.GetLocalControllerAngularAcceleration(c);
             capturePoints[index].rotation = OVRInput.GetLocalControllerRotation(c);
-            capturePoints[index].midiNote = m_NoteCallback.GetLastNoteRecieved();
+            capturePoints[index].midiNote = dcm.GetLastNoteHit(c); // REPLACE THIS WITH DRUM COLLISION MAN METHOD
             index++;
         }
 

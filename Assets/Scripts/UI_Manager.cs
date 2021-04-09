@@ -37,6 +37,7 @@ public class UI_Manager : MonoBehaviour
     bool capToggle;
     bool stickAdjustTranslate;
     bool stickAdjustRotate;
+    bool calibratePlacement;
 
     public DrumKit_Manager dkMan;
     // Start is called before the first frame update
@@ -198,5 +199,12 @@ public class UI_Manager : MonoBehaviour
         stickAdjustRotate = !stickAdjustRotate;
         ToggleButtonColor(stickAdjustRotate);
         //playerController.EnableLinearMovement = stickAdjustTranslate;
+    }
+
+    public void OnCalibrateDrumPlacement()
+    {
+        calibratePlacement = !calibratePlacement;
+        ToggleButtonColor(calibratePlacement);
+        GameObject.Find("Manager").GetComponent<DrumCollisionManager>().CalibrateDrumPlacement(calibratePlacement);
     }
 }
