@@ -14,6 +14,8 @@ public class NoteCallback : MonoBehaviour
 
     DrumCollisionManager dcm;
 
+    public float m_HiHatPedal;
+
     private void Start()
     {
         print("STARTING MIDI SERVICE!");
@@ -66,6 +68,17 @@ public class NoteCallback : MonoBehaviour
             m_LastNote = new Vector2Int(noteEvent.NoteNumber, noteEvent.Velocity);
             // this won't work unfortunately because of the external library not having a definition of ienumerator
             //dcm.ReportMidiNote(new Vector2Int(noteEvent.NoteNumber, noteEvent.Velocity));
+        }
+
+        if(e.Event.EventType.Equals(MidiEventType.ControlChange))
+        {
+            ControlChangeEvent controlChange = (ControlChangeEvent)e.Event;
+            // implement hihat movement here
+            print(controlChange);
+            if (controlChange.ControlNumber == 4)
+            {
+                m_HiHatPedal = (float)controlChange.ControlValue / 128f;
+            }
         }
     }
 }

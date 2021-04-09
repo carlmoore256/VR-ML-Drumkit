@@ -6,6 +6,13 @@ TagManager:
   tags:
   - controller
   - stick
+  - tommid
+  - tomhi
+  - tomfloor
+  - crash
+  - ride
+  - snare
+  - hihat
   layers:
   - Default
   - TransparentFX
@@ -19,8 +26,8 @@ TagManager:
   - Player
   - MoveableProp
   - Button
-  - 
-  - 
+  - DrumBalance
+  - HiHat
   - 
   - 
   - 

@@ -14,6 +14,8 @@ public class MoveableProp : MonoBehaviour
 
     private Vector3 mGrabOffset;
 
+    public bool m_Repositioning = false;
+
     void Start()
     {
         allRenderers = GetComponentsInChildren<Renderer>();
@@ -30,6 +32,8 @@ public class MoveableProp : MonoBehaviour
     // allows user to grab and move prop; grab flag captures initial offset
     public void MoveProp(Vector3 newPosition, bool grabFlag)
     {
+        m_Repositioning = true;
+
         if (grabFlag)
             mGrabOffset = transform.position-newPosition;
 
@@ -39,6 +43,7 @@ public class MoveableProp : MonoBehaviour
 
         transform.position = mGrabOffset + newPosition;
     }
+
 
     public void ScaleProp(float scale)
     {
@@ -63,6 +68,9 @@ public class MoveableProp : MonoBehaviour
 
         for(int i = 0; i < allRenderers.Length; i++)
             allRenderers[i].material = allMaterials[i];
+
+        yield return new WaitForSeconds(0.1f);
+        m_Repositioning = false;
 
     }
 }
