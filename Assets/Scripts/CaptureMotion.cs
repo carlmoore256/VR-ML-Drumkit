@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using UnityEditor.Scripting.Python;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
@@ -38,14 +39,24 @@ public class CaptureMotion : MonoBehaviour
 
     public string saveCaptureDir = "CapturedMotion/";
 
+    public bool saveJSON = true;
+
     public float forwardOffset = 0.1f;
 
     public Transform playerPosition;
 
     public bool m_CapRunning;
 
+    public int m_FramesCaptured;
+
+    public float m_CapDuration;
+
+    float m_InitTime;
+
     private Vector3 currentPlayerPosition;
+
     private Vector3 playerForward;
+
     private double sampleInterval;
 
     Thread captureThread = null;
@@ -53,15 +64,18 @@ public class CaptureMotion : MonoBehaviour
     List<CapturePoint[]> m_PreviewCapPoints; // do this differently eventually
     OVRInput.Controller[] trackedControllers;
 
-    DrumCollisionManager dcm; 
+    DrumCollisionManager dcm;
+    CapStatsUI cs_ui;
 
     void Start()
     {
         m_CapturePoints = new List<CapturePoint[]>();
         sampleInterval = 1.0d / sampleRate;
 
-        trackedControllers = new OVRInput.Controller[] { OVRInput.Controller.LTrackedRemote, OVRInput.Controller.RTrackedRemote };
+        //trackedControllers = new OVRInput.Controller[] { OVRInput.Controller.LTrackedRemote, OVRInput.Controller.RTrackedRemote };
+        trackedControllers = new OVRInput.Controller[] { OVRInput.Controller.LTouch, OVRInput.Controller.RTouch };
         dcm = GetComponent<DrumCollisionManager>();
+        cs_ui = GameObject.Find("CapStats").GetComponent<CapStatsUI>();
     }
 
     public void ToggleCapture()
@@ -78,8 +92,15 @@ public class CaptureMotion : MonoBehaviour
     // can be called externally to begin the capture
     public void StartCapture()
     {
+        m_FramesCaptured = 0;
+        m_CapDuration = 0.0f;
+        m_InitTime = Time.time;
+
+        cs_ui.UpdateStaticStats(sampleRate);
+
+        print($"Starting capture @ {sampleRate} Hz");
+
         m_CapturePoints = new List<CapturePoint[]>();
-        print("STARTING CAPTURE!");
         captureThread = new Thread(RunCapture);
         captureThread.Start();
         m_CapRunning = true;
@@ -109,6 +130,7 @@ public class CaptureMotion : MonoBehaviour
                 CapturePoint[] ctrlPoints = GetCapturePoints();
                 m_CapturePoints.Add(ctrlPoints);
                 nextCap = now + sampleInterval;
+                m_FramesCaptured += 1;
             }
         }
         // if(!tof && Time.time > timeout)
@@ -139,15 +161,22 @@ public class CaptureMotion : MonoBehaviour
 
     void Update()
     {
-        // we can't access this from a separate thread in the capture, 
-        // so we assign it during update
-        currentPlayerPosition = playerPosition.position;
-        playerForward = playerPosition.forward;
+
         //Vector3 pos = OVRInput.GetLocalControllerPosition(c);
         // {
         //     print("TIME RAN OUT!!!");
         //     EndCapture();
         // }
+
+        if (m_CapRunning)
+        {
+            // we can't access this from a separate thread in the capture, 
+            // so we assign it during update
+            currentPlayerPosition = playerPosition.position;
+            playerForward = playerPosition.forward;
+            m_CapDuration = Time.time - m_InitTime;
+            cs_ui.UpdateStats(m_FramesCaptured, m_CapDuration);
+        }
     }
 
 
@@ -268,6 +297,8 @@ public class CaptureMotion : MonoBehaviour
         return positions;
     }
 }
+
+
 
 // LOOK INTO OVRBOUNDARY - BoundaryTestResult -> seems to report world position of hands
 // * NO, this actually returns the closest point of the boundary to the hand

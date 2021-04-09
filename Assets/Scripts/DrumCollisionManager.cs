@@ -72,6 +72,7 @@ public class DrumCollisionManager : MonoBehaviour
 
         if (midiNote.x != 0)
         {
+            print("MIDI NOTE DETECCTED ! " + midiNote);
             if (m_MidiTimeout != null)
                 StopCoroutine(m_MidiTimeout);
             m_MidiTimeout = StartCoroutine(MidiEventTimeout(midiNote.x, midiNote.y));
@@ -81,28 +82,16 @@ public class DrumCollisionManager : MonoBehaviour
         {
             StopCoroutine(m_MidiTimeout);
             StopCoroutine(m_CollisionTimeout);
+            m_MidiTimeout = null;
+            m_CollisionTimeout = null;
             VerifiedCollisionCallback(m_LastNoteMidi, m_LastVelocity, m_LastController);
         }
-        //ReportMidiNote(midiNote);
-
-        //if (midiNote.x != 0 && m_CollisionTimeout != null)
-        //{
-        //    print("MIDI NOTE NOT ZERO, TIMEOUT STILL GOING " + midiNote);
-        //    StopCoroutine(m_CollisionTimeout);
-
-        //    if(midiNote.x != 0 && m_LastNote == midiNote.x)
-        //    {
-        //        m_LastVelocity = midiNote.y;
-        //        VerifiedCollisionCallback(midiNote.x, midiNote.y, m_LastController);
-        //    }
-        //}
     }
 
     void VerifiedCollisionCallback(int note, int velocity, OVRInput.Controller c)
     {
         string drumTag = MidiMappings.FirstOrDefault(x => x.Value == note).Key;
         print(drumTag + " collision. Note: " + note + " velocity: " + velocity + " controller: " + c);
-
         m_LastController = c;
         m_LastNoteHit = new Vector2Int(note, velocity);
     }
@@ -113,6 +102,8 @@ public class DrumCollisionManager : MonoBehaviour
         m_LastNoteMidi = note;
         m_LastVelocity = velocity;
         yield return new WaitForSeconds(m_CorrTimeout);
+        m_MidiTimeout = null;
+        print("MIDI TIMED OUT!");
     }
 
     IEnumerator CollisionEventTimeout(int note, OVRInput.Controller c)
@@ -121,38 +112,39 @@ public class DrumCollisionManager : MonoBehaviour
         m_LastNoteCollision = note;
         m_LastController = c;
         yield return new WaitForSeconds(m_CorrTimeout);
+        m_CollisionTimeout = null;
     }
 
     // reports a midi event
-    public void ReportMidiNote(Vector2Int note)
-    {
-        print("MIDI NOTE HIT! " + note);
+    //public void ReportMidiNote(Vector2Int note)
+    //{
+    //    print("MIDI NOTE HIT! " + note);
 
-        if (m_MidiTimeout != null)
-            StopCoroutine(m_MidiTimeout);
+    //    if (m_MidiTimeout != null)
+    //        StopCoroutine(m_MidiTimeout);
 
-        if (m_CollisionTimeout != null)
-        {
+    //    if (m_CollisionTimeout != null)
+    //    {
 
-            StopCoroutine(m_CollisionTimeout);
-            print("MIDI - m_LastNote=" + m_LastNote + " this note=" + note.x);
+    //        StopCoroutine(m_CollisionTimeout);
+    //        print("MIDI - m_LastNote=" + m_LastNote + " this note=" + note.x);
 
-            // in this case, the collision has already happened in unity
-            if (m_LastNote == note.x)
-            {
-                VerifiedCollisionCallback(note.x, note.y, m_LastController);
-            }
-            else
-            {
-                // if last note doesn't equal, start a new coroutine
-                m_MidiTimeout = StartCoroutine(MidiEventTimeout(note.x, note.y));
-            }
-        }
-        else
-        {
-            m_MidiTimeout = StartCoroutine(MidiEventTimeout(note.x, note.y));
-        }
-    }
+    //        // in this case, the collision has already happened in unity
+    //        if (m_LastNote == note.x)
+    //        {
+    //            VerifiedCollisionCallback(note.x, note.y, m_LastController);
+    //        }
+    //        else
+    //        {
+    //            // if last note doesn't equal, start a new coroutine
+    //            m_MidiTimeout = StartCoroutine(MidiEventTimeout(note.x, note.y));
+    //        }
+    //    }
+    //    else
+    //    {
+    //        m_MidiTimeout = StartCoroutine(MidiEventTimeout(note.x, note.y));
+    //    }
+    //}
 
     // reports when virtual drum stick collides with a drum
     public void ReportCollision(string parentName, string tag)

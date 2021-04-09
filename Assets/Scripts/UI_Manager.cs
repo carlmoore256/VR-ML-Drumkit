@@ -14,6 +14,7 @@ public class UI_Manager : MonoBehaviour
     public CaptureMotion captureMotion;
 
     public GameObject UI_panel;
+    public GameObject capturePanel;
 
     public GameObject linePointer_L;
     public GameObject linePointer_R;
@@ -46,6 +47,7 @@ public class UI_Manager : MonoBehaviour
         img = GetComponent<Image>();
 
         UI_panel.SetActive(false);
+        capturePanel.SetActive(false);
 
         // initialize line pointers for when menu pops up
         lr_l = linePointer_L.GetComponent<LineRenderer>();
@@ -76,6 +78,12 @@ public class UI_Manager : MonoBehaviour
                 AdjustStickRotation(OVRInput.Get(OVRInput.Axis2D.PrimaryThumbstick), stick_L);
                 AdjustStickRotation(OVRInput.Get(OVRInput.Axis2D.SecondaryThumbstick), stick_R);
             }
+        }
+
+        if(capToggle)
+        {
+            //GameObject frames = capturePanel.GetComponentInChildren<GameObject>()
+            //Text frameStats = capturePanel.GetComponentInChildren<Text>().
         }
     }
 
@@ -179,6 +187,7 @@ public class UI_Manager : MonoBehaviour
         capToggle = !capToggle; // negate bool
         ToggleButtonColor(capToggle);
         captureMotion.ToggleCapture();
+        capturePanel.SetActive(capToggle);
     }
 
     public void OnPlayerMovement()
