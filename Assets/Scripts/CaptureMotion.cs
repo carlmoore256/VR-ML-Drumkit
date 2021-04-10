@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using UnityEditor.Scripting.Python;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
@@ -39,7 +38,7 @@ public class CaptureMotion : MonoBehaviour
 
     public string saveCaptureDir = "CapturedMotion/";
 
-    public bool saveJSON = true;
+    //public bool saveJSON = true;
 
     public float forwardOffset = 0.1f;
 
@@ -52,6 +51,12 @@ public class CaptureMotion : MonoBehaviour
     public float m_CapDuration;
 
     float m_InitTime;
+
+    public Transform m_StickTipL;
+    public Transform m_StickTipR;
+
+    private Vector3 m_CurrentTipL;
+    private Vector3 m_CurrentTipR;
 
     private Vector3 currentPlayerPosition;
 
@@ -146,6 +151,14 @@ public class CaptureMotion : MonoBehaviour
         {
             capturePoints[index].controller = c;
             capturePoints[index].position = OVRInput.GetLocalControllerPosition(c);
+
+            //if (c == OVRInput.Controller.LTouch)
+            //{
+            //    capturePoints[index].worldSpacePosition = m_CurrentTipL;
+            //}
+            //else {
+            //    capturePoints[index].worldSpacePosition = m_CurrentTipR;
+            //}
             capturePoints[index].worldSpacePosition = OVRInput.GetLocalControllerPosition(c) + currentPlayerPosition + (playerForward * forwardOffset);
             capturePoints[index].velocity = OVRInput.GetLocalControllerVelocity(c);
             capturePoints[index].acceleration = OVRInput.GetLocalControllerAcceleration(c);
@@ -174,6 +187,10 @@ public class CaptureMotion : MonoBehaviour
             // so we assign it during update
             currentPlayerPosition = playerPosition.position;
             playerForward = playerPosition.forward;
+
+            m_CurrentTipL = m_StickTipL.position;
+            m_CurrentTipR = m_StickTipR.position;
+
             m_CapDuration = Time.time - m_InitTime;
             cs_ui.UpdateStats(m_FramesCaptured, m_CapDuration);
         }

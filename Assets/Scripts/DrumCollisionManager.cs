@@ -14,6 +14,9 @@ public class DrumCollisionManager : MonoBehaviour
     // how long system waits before clearing collision results
     public float m_CorrTimeout = 0.2f;
 
+    public Transform m_DrumStickTipL;
+    public Transform m_DrumStickTipR;
+
     Coroutine m_MidiTimeout;
     Coroutine m_CollisionTimeout;
 
@@ -25,7 +28,14 @@ public class DrumCollisionManager : MonoBehaviour
     int m_LastNoteMidi = 0;
     int m_LastVelocity = 0;
 
+    bool m_CalibratingPositions = false;
+
+    float m_LastMidiTime;
+    float m_LastCollisionTime;
+
+    Vector3 m_LastCollisionPos;
     Vector2Int m_LastNoteHit;
+    GameObject m_LastDrumObject;
 
     OVRInput.Controller m_LastController = OVRInput.Controller.None;
 
@@ -56,7 +66,7 @@ public class DrumCollisionManager : MonoBehaviour
         {
             Vector2Int lastNote = m_LastNoteHit;
             m_LastNoteHit = new Vector2Int(0, 0);
-            return m_LastNoteHit;
+            return lastNote;
         } else
         {
             return new Vector2Int(0, 0);
@@ -68,11 +78,14 @@ public class DrumCollisionManager : MonoBehaviour
     // midi library to sucessfully call an IEnumerator from its callback
     private void Update()
     {
+        bool midiNoteThisFrame = false;
+
         Vector2Int midiNote = ncb.GetLastNoteRecieved();
 
         if (midiNote.x != 0)
         {
-            print("MIDI NOTE DETECCTED ! " + midiNote);
+            midiNoteThisFrame = true;
+            m_LastMidiTime = Time.time;
             if (m_MidiTimeout != null)
                 StopCoroutine(m_MidiTimeout);
             m_MidiTimeout = StartCoroutine(MidiEventTimeout(midiNote.x, midiNote.y));
@@ -84,16 +97,48 @@ public class DrumCollisionManager : MonoBehaviour
             StopCoroutine(m_CollisionTimeout);
             m_MidiTimeout = null;
             m_CollisionTimeout = null;
-            VerifiedCollisionCallback(m_LastNoteMidi, m_LastVelocity, m_LastController);
+            VerifiedCollisionCallback(m_LastNoteMidi, 
+                                        m_LastVelocity, 
+                                        m_LastController,
+                                        m_LastDrumObject, 
+                                        m_LastCollisionPos,
+                                        midiNoteThisFrame);
         }
     }
 
-    void VerifiedCollisionCallback(int note, int velocity, OVRInput.Controller c)
+    void VerifiedCollisionCallback(int note, 
+                                    int velocity, 
+                                    OVRInput.Controller c, 
+                                    GameObject drum, 
+                                    Vector3 collisionPos,
+                                    bool collidedBeforeMidi)
     {
         string drumTag = MidiMappings.FirstOrDefault(x => x.Value == note).Key;
         print(drumTag + " collision. Note: " + note + " velocity: " + velocity + " controller: " + c);
         m_LastController = c;
         m_LastNoteHit = new Vector2Int(note, velocity);
+
+        if (m_CalibratingPositions && collidedBeforeMidi)
+            CalibratePosition(drum, collisionPos, c);
+    }
+
+
+    // we only want to adjust if unity collision happens before midi trigger
+    // because presumably the stick is physically blocked from moving further
+    // in the world space by the drum head IRL
+    void CalibratePosition(GameObject drum, 
+                            Vector3 collisionPos,
+                            OVRInput.Controller c)
+    {
+        Transform stickTip = MatchControllerToStick(c);
+        Vector3 newOffset = stickTip.position - collisionPos;
+
+        // only move in the y direction
+        newOffset.x = 0;
+        newOffset.z = 0;
+
+        drum.transform.position += newOffset;
+
     }
 
     IEnumerator MidiEventTimeout(int note, int velocity)
@@ -147,8 +192,15 @@ public class DrumCollisionManager : MonoBehaviour
     //}
 
     // reports when virtual drum stick collides with a drum
-    public void ReportCollision(string parentName, string tag)
+    public void ReportCollision(string parentName, 
+                                string tag, 
+                                GameObject drum, 
+                                Vector3 collisionPosition)
     {
+        m_LastDrumObject = drum;
+        m_LastCollisionPos = collisionPosition;
+        m_LastCollisionTime = Time.time;
+
         try
         {
             int note = MidiMappings[tag];
@@ -157,25 +209,6 @@ public class DrumCollisionManager : MonoBehaviour
             if (m_CollisionTimeout != null)
                 StopCoroutine(m_CollisionTimeout);
             m_CollisionTimeout = StartCoroutine(CollisionEventTimeout(note, c));
-
-            //if (m_MidiTimeout != null)
-            //{
-            //    StopCoroutine(m_MidiTimeout);
-            //    print("COLLISION - m_LastNote=" + m_LastNote + " this note=" + note);
-            //    // no way this could be true twice in a row, because we stop midi timeout
-            //    if (m_LastNote == note)
-            //    {
-            //        VerifiedCollisionCallback(note, m_LastVelocity, c);
-            //    }
-            //    else
-            //    {
-            //        m_CollisionTimeout = StartCoroutine(CollisionEventTimeout(note, c));
-            //    }
-            //}
-            //else
-            //{
-            //    m_CollisionTimeout = StartCoroutine(CollisionEventTimeout(note, c));
-            //}
 
         } catch (Exception e) // in case tag doesn't match midi mappings
         {
@@ -196,8 +229,23 @@ public class DrumCollisionManager : MonoBehaviour
         }
     }
 
+    Transform MatchControllerToStick(OVRInput.Controller c)
+    {
+        switch (c)
+        {
+            case OVRInput.Controller.LTouch:
+                return m_DrumStickTipL;
+            case OVRInput.Controller.RTouch:
+                return m_DrumStickTipR;
+            default: 
+                return null;
+        }
+    }
+
+    //Transform Match
+
     public void CalibrateDrumPlacement(bool toggle)
     {
-        //if
+        m_CalibratingPositions = toggle;
     }
 }

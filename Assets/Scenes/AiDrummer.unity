@@ -2307,11 +2307,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sampleRate: 500
   saveCaptureDir: CapturedMotion/
-  forwardOffset: 0.1
+  forwardOffset: 0
   playerPosition: {fileID: 485019275}
   m_CapRunning: 0
   m_FramesCaptured: 0
   m_CapDuration: 0
+  m_StickTipL: {fileID: 1615529329}
+  m_StickTipR: {fileID: 1615529328}
 --- !u!4 &1048972405
 Transform:
   m_ObjectHideFlags: 0
@@ -2352,6 +2354,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_CorrTimeout: 0.1
+  m_DrumStickTipL: {fileID: 1615529329}
+  m_DrumStickTipR: {fileID: 1615529328}
 --- !u!1 &1074776084
 GameObject:
   m_ObjectHideFlags: 0
@@ -4323,6 +4327,18 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 8949132968391797339, guid: 717e865a2e484284eaaaa6bd673a3639, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 717e865a2e484284eaaaa6bd673a3639, type: 3}
+--- !u!4 &1615529328 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8977818116404145110, guid: 717e865a2e484284eaaaa6bd673a3639,
+    type: 3}
+  m_PrefabInstance: {fileID: 1615529327}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1615529329 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3531694605499174174, guid: 717e865a2e484284eaaaa6bd673a3639,
+    type: 3}
+  m_PrefabInstance: {fileID: 1615529327}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1656351410
 GameObject:
   m_ObjectHideFlags: 0
@@ -7856,8 +7872,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   trailSecs: 1
+  lineWidth: 0.01
   deviceIndex: 0
-  trailOffset: {x: 0, y: 0, z: 0.32}
+  trailOffset: {x: 0, y: 0, z: 0}
 --- !u!120 &8685795668796644739
 LineRenderer:
   m_ObjectHideFlags: 0
@@ -7968,8 +7985,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   trailSecs: 1
+  lineWidth: 0.01
   deviceIndex: 1
-  trailOffset: {x: 0, y: 0, z: 0.32}
+  trailOffset: {x: 0, y: 0, z: 0}
 --- !u!120 &8685795669749787269
 LineRenderer:
   m_ObjectHideFlags: 0

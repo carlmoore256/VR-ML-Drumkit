@@ -16,6 +16,8 @@ public class NoteCallback : MonoBehaviour
 
     public float m_HiHatPedal;
 
+    float m_LastNotePlayTime;
+
     private void Start()
     {
         print("STARTING MIDI SERVICE!");
@@ -51,6 +53,12 @@ public class NoteCallback : MonoBehaviour
         return notePlayed;
     }
 
+    // doesn't work
+    public float GetLastNotePlaytime()
+    {
+        return m_LastNotePlayTime;
+    }
+
     private void Update()
     {
         //print("IS LISTENING? " + m_InputDevice.IsListeningForEvents);
@@ -65,6 +73,7 @@ public class NoteCallback : MonoBehaviour
         if(e.Event.EventType.Equals(MidiEventType.NoteOn))
         {
             NoteEvent noteEvent = (NoteEvent)e.Event;
+            //m_LastNotePlayTime = Time.time;
             m_LastNote = new Vector2Int(noteEvent.NoteNumber, noteEvent.Velocity);
             // this won't work unfortunately because of the external library not having a definition of ienumerator
             //dcm.ReportMidiNote(new Vector2Int(noteEvent.NoteNumber, noteEvent.Velocity));

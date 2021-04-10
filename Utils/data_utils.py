@@ -8,6 +8,11 @@ def save_json(out_path, data, indent=3):
     json.dump(data, outfile, sort_keys=False, indent=indent)
   print(f'wrote json to {out_path}')
 
+def load_json(path):
+  with open(path) as json_file:
+      jfile = json.load(json_file)
+  return jfile
+  
 # format data capture as a dict
 def format_dict(data, keys):
     data_out = {}

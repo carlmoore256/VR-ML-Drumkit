@@ -8,6 +8,8 @@ public class MotionPreview : MonoBehaviour
 
     public float trailSecs = 1f;
 
+    public float lineWidth = 0.001f;
+
     public int deviceIndex;
 
     public Vector3 trailOffset;
@@ -29,6 +31,8 @@ public class MotionPreview : MonoBehaviour
         print("trail length : " + m_TrailLength);
         linePoints = new Vector3[m_TrailLength];
         line.enabled = false;
+        line.startWidth = lineWidth;
+        line.endWidth = lineWidth;
     }
 
     void Update()
