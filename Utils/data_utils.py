@@ -38,6 +38,7 @@ def convert_capture_json(folder=None, out_path=None):
         tail = os.path.split(folder)[-1]
         out_path = os.path.join(folder, f"capture_{tail}.json")
     save_json(out_path, data_dict)
+    return out_path
 
 def listdirs(folder):
     folder = os.path.abspath(folder)

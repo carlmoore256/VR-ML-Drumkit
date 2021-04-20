@@ -151,14 +151,6 @@ public class CaptureMotion : MonoBehaviour
         {
             capturePoints[index].controller = c;
             capturePoints[index].position = OVRInput.GetLocalControllerPosition(c);
-
-            //if (c == OVRInput.Controller.LTouch)
-            //{
-            //    capturePoints[index].worldSpacePosition = m_CurrentTipL;
-            //}
-            //else {
-            //    capturePoints[index].worldSpacePosition = m_CurrentTipR;
-            //}
             capturePoints[index].worldSpacePosition = OVRInput.GetLocalControllerPosition(c) + currentPlayerPosition + (playerForward * forwardOffset);
             capturePoints[index].velocity = OVRInput.GetLocalControllerVelocity(c);
             capturePoints[index].acceleration = OVRInput.GetLocalControllerAcceleration(c);

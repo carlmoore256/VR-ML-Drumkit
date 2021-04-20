@@ -31,21 +31,23 @@ public class Drum : MonoBehaviour
 
     void OnCollisionEnter(Collision collision)
     {
-        if(collision.gameObject.CompareTag("stick"))
-        {
-            // report collision with name of controller and this drum's tag
-            GameObject colliderParent = collision.transform.parent.gameObject;
-            dcm.ReportCollision(colliderParent.name, 
-                                gameObject.tag, 
-                                gameObject.transform.parent.gameObject, 
-                                collision.GetContact(0).point);
-            // float velocity = collision.relativeVelocity.magnitude;
-            float velocity = 1f;
-            DrumHit(velocity);
-        }
+        // drum trigger event moved to drumCollisionManager
+        // only hits with both a collision and midi note will be played
+        //if(collision.gameObject.CompareTag("stick"))
+        //{
+        //    // report collision with name of controller and this drum's tag
+        //    GameObject colliderParent = collision.transform.parent.gameObject;
+        //    dcm.ReportCollision(colliderParent.name, 
+        //                        gameObject.tag, 
+        //                        gameObject.transform.parent.gameObject, 
+        //                        collision.GetContact(0).point);
+        //    // float velocity = collision.relativeVelocity.magnitude;
+        //    float velocity = 1f;
+        //    DrumHit(velocity);
+        //}
     }
 
-    void DrumHit(float velocity)
+    public void DrumHit(float velocity)
     {
         PlaySound(velocity);
 

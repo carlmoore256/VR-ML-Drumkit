@@ -74,6 +74,7 @@ public class NoteCallback : MonoBehaviour
         {
             NoteEvent noteEvent = (NoteEvent)e.Event;
             //m_LastNotePlayTime = Time.time;
+            print($"MIDI EVENT: note {noteEvent.NoteNumber} vel {noteEvent.Velocity}");
             m_LastNote = new Vector2Int(noteEvent.NoteNumber, noteEvent.Velocity);
             // this won't work unfortunately because of the external library not having a definition of ienumerator
             //dcm.ReportMidiNote(new Vector2Int(noteEvent.NoteNumber, noteEvent.Velocity));

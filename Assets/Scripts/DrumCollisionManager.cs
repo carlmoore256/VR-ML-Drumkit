@@ -118,6 +118,8 @@ public class DrumCollisionManager : MonoBehaviour
         m_LastController = c;
         m_LastNoteHit = new Vector2Int(note, velocity);
 
+        drum.GetComponentInChildren<Drum>().DrumHit((float)velocity/127f);
+
         if (m_CalibratingPositions && collidedBeforeMidi)
             CalibratePosition(drum, collisionPos, c);
     }
@@ -148,7 +150,6 @@ public class DrumCollisionManager : MonoBehaviour
         m_LastVelocity = velocity;
         yield return new WaitForSeconds(m_CorrTimeout);
         m_MidiTimeout = null;
-        print("MIDI TIMED OUT!");
     }
 
     IEnumerator CollisionEventTimeout(int note, OVRInput.Controller c)
