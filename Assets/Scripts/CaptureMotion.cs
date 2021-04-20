@@ -111,11 +111,12 @@ public class CaptureMotion : MonoBehaviour
         m_CapRunning = true;
     }
 
-    public void EndCapture()
+    public void EndCapture(bool saveData = true)
     {
         captureThread.Abort();
         print("capture thread ended successfully, saving data...");
-        WriteMotionData();
+        if (saveData)
+            WriteMotionData();
         m_CapRunning = false;
     }
 
@@ -192,13 +193,13 @@ public class CaptureMotion : MonoBehaviour
     void OnDestroy()
     {
         if (captureThread != null)
-            EndCapture();
+            EndCapture(false);
     }
 
     void OnApplicationQuit()
     {
         if (captureThread != null)
-            EndCapture();
+            EndCapture(false);
     }
 
     void WriteMotionData()
