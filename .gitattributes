@@ -1,1 +1,5 @@
-"Assets/TextMesh Pro/*" linguist-vendored=false
+# "Assets/TextMesh Pro/*" linguist-vendored=false
+
+
+* linguist-vendored
+*.shader linguist-vendored=false
