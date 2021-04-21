@@ -19,10 +19,10 @@ public class Drum : MonoBehaviour
         audioSource = gameObject.AddComponent<AudioSource>();
         dcm = GameObject.Find("Manager").GetComponent<DrumCollisionManager>();
     }
-
     void Update()
     {
     }
+
 
     void PlaySound(float velocity)
     {
@@ -33,18 +33,18 @@ public class Drum : MonoBehaviour
     {
         // drum trigger event moved to drumCollisionManager
         // only hits with both a collision and midi note will be played
-        //if(collision.gameObject.CompareTag("stick"))
-        //{
-        //    // report collision with name of controller and this drum's tag
-        //    GameObject colliderParent = collision.transform.parent.gameObject;
-        //    dcm.ReportCollision(colliderParent.name, 
-        //                        gameObject.tag, 
-        //                        gameObject.transform.parent.gameObject, 
-        //                        collision.GetContact(0).point);
-        //    // float velocity = collision.relativeVelocity.magnitude;
-        //    float velocity = 1f;
-        //    DrumHit(velocity);
-        //}
+        if (collision.gameObject.CompareTag("stick"))
+        {
+            // report collision with name of controller and this drum's tag
+            GameObject colliderParent = collision.transform.parent.gameObject;
+            dcm.ReportCollision(colliderParent.name,
+                                gameObject.tag,
+                                gameObject.transform.parent.gameObject,
+                                collision.GetContact(0).point);
+            // float velocity = collision.relativeVelocity.magnitude;
+            float velocity = 1f;
+            //DrumHit(velocity);
+        }
     }
 
     public void DrumHit(float velocity)
